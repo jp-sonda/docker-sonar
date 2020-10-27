@@ -24,6 +24,27 @@ We recommend creating volumes for the following directories:
 
 Warning: You cannot use the same volumes on multiple instances of SonarQube.
 
+## Configuring Postgres Database
+
+```bash
+mkdir -p postgres-data
+docker run -d -h sonar-postgres \
+    --name sonar-postgres \
+    -e POSTGRES_PASSWORD=mysecretpassword \
+    -e PGDATA=/var/lib/postgresql/data/pgdata \
+    -v $PWD/postgres-data:/var/lib/postgresql/data \
+    postgres:12.4
+
+docker exec -it sonar-postgres bash
+sudo -u postgres psql
+
+CREATE DATABASE sonarqube WITH ENCODING 'UTF8';
+CREATE USER sonarqube WITH ENCRYPTED PASSWORD 'sonarsecretpassword';
+GRANT ALL PRIVILEGES ON DATABASE sonarqube TO sonarqube;
+ALTER DATABASE sonarqube OWNER TO sonarqube;
+\q
+```
+
 ## Executing the container
 
 Avoid hard termination of SonarQube
@@ -32,7 +53,12 @@ Starting from SonarQube 7.8, SonarQube stops gracefully, waiting for any tasks i
 docker run  sonarqube
 
 ```bash
-mkdir -p conf data logs extensions
+mkdir -p conf data logs extensions/plugins
+touch conf/sonar.properties
+echo "sonar.jdbc.username=sonarqube" > conf/sonar.properties
+echo "sonar.jdbc.password=mypassword" >> conf/sonar.properties
+echo "sonar.jdbc.url=jdbc:postgresql://sonar-postgres/sonarqube" >> conf/sonar.properties
+
 docker run -d --stop-timeout 3600 -h sonarqube \
        -v $PWD/conf:/opt/sonarqube/conf \
        -v $PWD/data:/opt/sonarqube/data \
@@ -49,7 +75,23 @@ docker logs sonarqube -f
 docker exec -it sonarqube bash
 ```
 
-Inside the Container you can run some awesome commands.
+Inside the Container you can monitor sonar log files for issues.
+
+```bash
+# SonarQube service log
+tail -f /opt/sonarqube/logs/sonar.log
+
+# Web Server logs
+tail -f /opt/sonarqube/logs/web.log
+
+# ElasticSearch logs
+tail -f /opt/sonarqube/logs/es.log
+
+# Compute Engine logs
+tail -f /opt/sonarqube/logs/ce.log
+```
+
+Inside the container you also can run some awesome commands.
 
 ```bash
 ps -ef
@@ -57,6 +99,8 @@ uname -a
 cat /etc/hosts
 cat /etc/os-release
 ifconfig
+netstat -tulpn
+htop
 ```
 
 ## Analyzing a Project
@@ -74,8 +118,38 @@ Now that you're logged in to your local SonarQube instance, let's analyze a proj
 
 After successfully analyzing your code, you'll see your first analysis on SonarQube
 
-
-## Configuring Postgres Database
+## Other properties with make sense
 
 ```bash
+# DATABASE
+sonar.jdbc.username=sonarqube
+sonar.jdbc.password=<sonar-user-password>
+sonar.jdbc.url=jdbc:postgresql://sonar-postgres/sonarqube
+sonar.jdbc.maxActive=60
+sonar.jdbc.maxIdle=5
+sonar.jdbc.minIdle=2
+sonar.jdbc.maxWait=5000
+sonar.jdbc.minEvictableIdleTimeMillis=600000
+sonar.jdbc.timeBetweenEvictionRunsMillis=30000
+sonar.jdbc.removeAbandoned=true
+sonar.jdbc.removeAbandonedTimeout=60
+
+# WEB SERVER
+sonar.web.host=0.0.0.0
+sonar.web.port=9000
+sonar.web.javaOpts=-server -Xms512m -Xmx512m -XX:+HeapDumpOnOutOfMemoryError
+sonar.search.javaOpts=-server -Xms512m -Xmx512m -XX:+HeapDumpOnOutOfMemoryError
+sonar.ce.javaOpts=-server -Xms512m -Xmx512m -XX:+HeapDumpOnOutOfMemoryError
+
+# ACTIVE DIRECTORY CONFIGURATIONS
+sonar.security.realm=LDAP
+sonar.security.savePassword=true
+sonar.authenticator.downcase = true
+ldap.url=ldap://<ldap-server>.zone24x7.lk:389
+ldap.bindDn=<ldap-user>@zone24x7.lk
+ldap.bindPassword=<ldap-password>
+ldap.user.baseDn=dc=zone24x7,dc=lk
+ldap.user.request=(&(objectClass=User)(sAMAccountName={login}))
+ldap.user.realNameAttribute=cn
+ldap.user.emailAttribute=mail
 ```
