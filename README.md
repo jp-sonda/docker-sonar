@@ -28,7 +28,7 @@ Warning: You cannot use the same volumes on multiple instances of SonarQube.
 
 ```bash
 mkdir -p postgres-data
-docker run -d -h sonar-postgres \
+docker run -d --restart unless-stopped -h sonar-postgres \
     --name sonar-postgres \
     -e POSTGRES_PASSWORD=mysecretpassword \
     -e PGDATA=/var/lib/postgresql/data/pgdata \
@@ -59,7 +59,7 @@ echo "sonar.jdbc.username=sonarqube" > conf/sonar.properties
 echo "sonar.jdbc.password=mypassword" >> conf/sonar.properties
 echo "sonar.jdbc.url=jdbc:postgresql://sonar-postgres/sonarqube" >> conf/sonar.properties
 
-docker run -d --stop-timeout 3600 -h sonarqube \
+docker run -d --restart unless-stopped --stop-timeout 3600 -h sonarqube \
        -v $PWD/conf:/opt/sonarqube/conf \
        -v $PWD/data:/opt/sonarqube/data \
        -v $PWD/logs:/opt/sonarqube/logs \
