@@ -56,6 +56,7 @@ ps -ef
 uname -a
 cat /etc/hosts
 cat /etc/os-release
+ifconfig
 ```
 
 ## Analyzing a Project
@@ -65,12 +66,14 @@ Log in to http://localhost:9000 with Administrator credentials (login=**admin**,
 Now that you're logged in to your local SonarQube instance, let's analyze a project:
 
 - Click the Create new project button.
-- When asked How do you want to create your project, select Manually.
 - Give your project a Project key and a Display name and click the Set Up button.
 - Under Provide a token, select Generate a token. Give your token a name, click the Generate button, and click Continue.
 - Select your project's main language under Run analysis on your project, and follow the instructions to analyze your project. Here you'll download and execute a Scanner on your code (if you're using Maven or Gradle, the Scanner is automatically downloaded).
 
+![sonar-qube-01](docs/sonar-qube-01.png)
+
 After successfully analyzing your code, you'll see your first analysis on SonarQube
+
 
 ## Configuring Postgres Database
 
