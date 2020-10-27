@@ -1,6 +1,6 @@
 # docker-sonar
 
-## Criando a imagem
+## Building the image
 
 ```bash
 docker build -t parana/sonarqube .
@@ -24,7 +24,7 @@ We recommend creating volumes for the following directories:
 
 Warning: You cannot use the same volumes on multiple instances of SonarQube.
 
-## Executando o contêiner
+## Executing the container
 
 Avoid hard termination of SonarQube
 Starting from SonarQube 7.8, SonarQube stops gracefully, waiting for any tasks in progress to finish. Waiting for in-progress tasks to finish can take a large amount of time which the docker does not expect by default when stopping. To avoid having the SonarQube instance killed by the Docker daemon after 10 seconds, it is best to configure a timeout to stop the container with --stop-timeout. For example:
@@ -33,28 +33,34 @@ docker run  sonarqube
 
 ```bash
 mkdir -p conf data logs extensions
-docker run -d --stop-timeout 3600 \
+docker run -d --stop-timeout 3600 -h sonarqube \
        -v $PWD/conf:/opt/sonarqube/conf \
        -v $PWD/data:/opt/sonarqube/data \
        -v $PWD/logs:/opt/sonarqube/logs \
        -v $PWD/extensions:/opt/sonarqube/extensions \
        --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true \
-       -p 9000:9000
+       -p 9000:9000 \
        parana/sonarqube
-```
 
-Log in to http://localhost:9000 with Administrator credentials (login=admin, password=admin).
-
-
-```bash
 docker logs sonarqube -f
 ```
 
 ```bash
+docker exec -it sonarqube bash
+```
 
+Inside the Container you can run some awesome commands.
+
+```bash
+ps -ef
+uname -a
+cat /etc/hosts
+cat /etc/os-release
 ```
 
 ## Analyzing a Project
+
+Log in to http://localhost:9000 with Administrator credentials (login=**admin**, password=**admin**).
 
 Now that you're logged in to your local SonarQube instance, let's analyze a project:
 
@@ -65,3 +71,8 @@ Now that you're logged in to your local SonarQube instance, let's analyze a proj
 - Select your project's main language under Run analysis on your project, and follow the instructions to analyze your project. Here you'll download and execute a Scanner on your code (if you're using Maven or Gradle, the Scanner is automatically downloaded).
 
 After successfully analyzing your code, you'll see your first analysis on SonarQube
+
+## Configuring Postgres Database
+
+```bash
+```
