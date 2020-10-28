@@ -152,4 +152,14 @@ ldap.user.baseDn=dc=zone24x7,dc=lk
 ldap.user.request=(&(objectClass=User)(sAMAccountName={login}))
 ldap.user.realNameAttribute=cn
 ldap.user.emailAttribute=mail
+
+# PROXY SETTINGS
+http.proxyHost=<http proxy host address>
+http.proxyPort=<http proxy port>
+http.proxyUser=<http proxy username>
+http.proxyPassword=<http proxy password>
+https.proxyHost=<https proxy host address>
+https.proxyPort=<https proxy port>
+https.proxyUser=<https proxy username>
+https.proxyPassword=<https proxy password>
 ```
