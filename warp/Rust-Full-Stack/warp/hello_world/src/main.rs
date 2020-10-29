@@ -26,6 +26,7 @@ use self::{
 
 #[tokio::main]
 async fn main() {
+    #[cfg(feature="static")]
     let target: String = "0.0.0.0:8000".parse().unwrap();
     let blue = Style::new()
         .blue();
